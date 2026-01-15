@@ -1,6 +1,7 @@
 const { register, login, getMe, logout, trackDownload, upgradeToPremium, getAllUsers, approvePayment, rejectPayment } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 
+const express = require('express');
 const router = express.Router();
 
 router.post('/register', register);
