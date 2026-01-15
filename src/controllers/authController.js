@@ -13,6 +13,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   if (process.env.NODE_ENV === 'production') {
     options.secure = true;
+    options.sameSite = 'none'; // Required for Cross-Site (Frontend -> Backend) Cookies
   }
 
   res
