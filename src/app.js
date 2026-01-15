@@ -13,6 +13,9 @@ const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
+// Trust Proxy for Render (Required for Rate Limiter)
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 
