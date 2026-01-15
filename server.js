@@ -1,4 +1,15 @@
 require('dotenv').config();
+
+// Validate critical environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET is not defined.');
+  process.exit(1);
+}
+
+if (!process.env.MONGO_URI) {
+  console.error('FATAL ERROR: MONGO_URI is not defined.');
+  process.exit(1);
+}
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 
