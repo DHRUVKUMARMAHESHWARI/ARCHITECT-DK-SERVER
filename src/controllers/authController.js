@@ -91,8 +91,17 @@ exports.login = async (req, res, next) => {
 exports.trackDownload = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
+    const { templateId } = req.body;
 
-    if (!user.isPremium && user.downloads >= 1) {
+    // Premium Template Restriction
+    if (templateId === 'deloitte' && !user.isPremium && user.email !== 'dhruv@gmail.com') {
+      return res.status(403).json({
+        success: false,
+        error: 'This is a Premium Template. Please upgrade to use it.'
+      });
+    }
+
+    if (!user.isPremium && user.downloads >= 1 && user.email !== 'dhruv@gmail.com') {
       return res.status(403).json({ 
         success: false, 
         error: 'Download limit reached. Please upgrade to Premium.' 
@@ -203,10 +212,16 @@ exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
 
+    // Super Admin Bypass
+    let responseUser = user.toObject();
+    if (user.email === 'dhruv@gmail.com') {
+      responseUser.isPremium = true;
+    }
+
     res.status(200).json({
       success: true,
-      data: user,
-      isPremium: user.isPremium,
+      data: responseUser,
+      isPremium: responseUser.isPremium,
       downloads: user.downloads
     });
   } catch (err) {
