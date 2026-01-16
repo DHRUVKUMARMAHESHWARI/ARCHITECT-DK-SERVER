@@ -66,7 +66,7 @@ exports.convertResumeFile = async (req, res, next) => {
     res.status(200).json(JSON.parse(response.text));
   } catch (error) {
     console.error("Gemini Conversion Error:", error);
-    next(new Error("Failed to process resume file."));
+    next(new Error(`Failed to process resume file: ${error.message}`));
   }
 };
 

@@ -63,7 +63,7 @@ app.use(cookieParser());
 // Specific limiter for AI routes (Expensive operations)
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each user to 20 AI requests per windowMs
+  max: 100, // Limit each user to 100 AI requests per windowMs
   keyGenerator: (req) => {
     return req.user.id; // Safe because 'protect' middleware ensures req.user exists
   },
