@@ -55,8 +55,30 @@ async function callGeminiWithRetry(model, promptOrParts, maxRetries = 3) {
             const isRetryable = isServiceUnavailable || isOverloaded;
             
             if (isRetryable && i < maxRetries - 1) {
-                const delay = Math.pow(2, i) * 1000 + (Math.random() * 1000);
-                console.warn(`Gemini Busy / Overloaded. Waiting ${Math.round(delay)}ms before retry...`);
+                let delay = Math.pow(2, i) * 1000 + (Math.random() * 1000);
+                let isRateLimit = false;
+
+                // Check for explicit RetryInfo in errorDetails
+                if (error.errorDetails && Array.isArray(error.errorDetails)) {
+                    const retryInfo = error.errorDetails.find(d => 
+                        d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo' || 
+                        (d['@type'] && d['@type'].includes('RetryInfo'))
+                    );
+                    
+                    if (retryInfo && retryInfo.retryDelay) {
+                        const seconds = parseFloat(retryInfo.retryDelay.replace('s', ''));
+                        if (!isNaN(seconds)) {
+                            delay = (seconds * 1000) + (Math.random() * 500); // Add small jitter
+                            isRateLimit = true;
+                            console.warn(`[Rate Limit] API requested wait of ${retryInfo.retryDelay}. Waiting ${Math.round(delay)}ms...`);
+                        }
+                    }
+                }
+
+                if (!isRateLimit) {
+                    console.warn(`Gemini Busy / Overloaded. Waiting ${Math.round(delay)}ms before retry...`);
+                }
+                
                 await wait(delay);
                 continue;
             }
@@ -190,3 +212,4 @@ exports.getATSFeedback = async (req, res, next) => {
     next(error);
   }
 };
+
