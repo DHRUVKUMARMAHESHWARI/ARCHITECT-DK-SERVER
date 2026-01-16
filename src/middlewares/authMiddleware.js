@@ -14,20 +14,25 @@ const protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    console.log("Auth Middleware: No token found in headers or cookies.");
+    return res.status(401).json({ success: false, error: 'Not authorized (No Token)' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // console.log("Auth Middleware: Token decoded", decoded); 
+
     req.user = await User.findById(decoded.id);
     
     if (!req.user) {
-      return res.status(401).json({ success: false, error: 'User not found' });
+      console.log("Auth Middleware: User not found with ID", decoded.id);
+      return res.status(401).json({ success: false, error: 'Not authorized (User Not Found)' });
     }
 
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    console.error("Auth Middleware Error:", err.message);
+    return res.status(401).json({ success: false, error: `Not authorized (Token Invalid: ${err.message})` });
   }
 };
 

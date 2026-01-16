@@ -20,6 +20,7 @@ connectDB();
 
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`API Key Status: ${process.env.API_KEY ? 'Present (Ends with ' + process.env.API_KEY.slice(-4) + ')' : 'MISSING'}`);
 });
 
 // Handle Unhandled Promise Rejections
