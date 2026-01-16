@@ -1,4 +1,4 @@
-const { register, login, getMe, logout, trackDownload, upgradeToPremium, getAllUsers, approvePayment, rejectPayment } = require('../controllers/authController');
+const { register, login, getMe, logout, trackDownload, upgradeToPremium, getAllUsers, approvePayment, rejectPayment, getTemplateStats } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const express = require('express');
@@ -12,6 +12,7 @@ router.post('/upgrade', protect, upgradeToPremium);
 router.post('/approve', protect, approvePayment);
 router.post('/reject', protect, rejectPayment);
 router.get('/users', protect, getAllUsers);
+router.get('/stats', getTemplateStats); // Public route
 router.get('/logout', logout);
 
 module.exports = router;

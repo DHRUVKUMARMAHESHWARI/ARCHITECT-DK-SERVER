@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const TemplateStat = require('../models/TemplateStat');
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -95,6 +96,15 @@ exports.trackDownload = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     const { templateId } = req.body;
+
+    // Increment Global Template Stats
+    if (templateId) {
+       await TemplateStat.findOneAndUpdate(
+         { templateId },
+         { $inc: { count: 1 } },
+         { upsert: true, new: true }
+       );
+    }
 
     // Premium Template Restriction (REMOVED for Donation Flow)
     // if (templateId === 'deloitte' && !user.isPremium && user.email !== 'dhruv@gmail.com') {
@@ -263,6 +273,33 @@ exports.getAllUsers = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: users
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+// @desc    Get public template stats
+// @route   GET /api/auth/stats
+// @access  Public
+exports.getTemplateStats = async (req, res, next) => {
+  try {
+    const stats = await TemplateStat.find({});
+    
+    // Calculate total resumes generated from USER history (Real Data)
+    const users = await User.find().select('downloads');
+    const totalResumeCount = users.reduce((acc, user) => acc + (user.downloads || 0), 0);
+
+    // Format as map or array for frontend
+    // Frontend expects: { sourabh: 120, modern: 50 ... }
+    const statsMap = {};
+    stats.forEach(s => {
+      statsMap[s.templateId] = s.count;
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: statsMap,
+      totalResumeCount
     });
   } catch (err) {
     next(err);
