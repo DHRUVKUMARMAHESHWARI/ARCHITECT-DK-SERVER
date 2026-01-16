@@ -1,6 +1,6 @@
 const { GoogleGenAI, Type } = require("@google/genai");
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "AIzaSyAM5sYAOjLUfA0hUKIjD8ycatbQGSMioaQ" });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY});
 
 const getResumeStructurePrompt = (jobDescription) => `
     Convert the provided document (Image or PDF) into structured HTML for a resume.
