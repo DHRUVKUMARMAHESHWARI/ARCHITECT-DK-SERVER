@@ -96,20 +96,21 @@ exports.trackDownload = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     const { templateId } = req.body;
 
-    // Premium Template Restriction
-    if (templateId === 'deloitte' && !user.isPremium && user.email !== 'dhruv@gmail.com') {
-      return res.status(403).json({
-        success: false,
-        error: 'This is a Premium Template. Please upgrade to use it.'
-      });
-    }
+    // Premium Template Restriction (REMOVED for Donation Flow)
+    // if (templateId === 'deloitte' && !user.isPremium && user.email !== 'dhruv@gmail.com') {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'This is a Premium Template. Please upgrade to use it.'
+    //   });
+    // }
 
-    if (!user.isPremium && user.downloads >= 1 && user.email !== 'dhruv@gmail.com') {
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Download limit reached. Please upgrade to Premium.' 
-      });
-    }
+    // Download Limit Restriction (REMOVED for Donation Flow)
+    // if (!user.isPremium && user.downloads >= 1 && user.email !== 'dhruv@gmail.com') {
+    //   return res.status(403).json({ 
+    //     success: false, 
+    //     error: 'Download limit reached. Please upgrade to Premium.' 
+    //   });
+    // }
 
     user.downloads += 1;
     await user.save();
