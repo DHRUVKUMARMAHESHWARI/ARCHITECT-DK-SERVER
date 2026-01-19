@@ -36,6 +36,15 @@ const getResumeStructurePrompt = (jobDescription) => `
 const cleanJsonString = (str) => {
   // Remove markdown code blocks if present
   let cleanStr = str.replace(/```json/g, '').replace(/```/g, '');
+  
+  // Attempt to find the first '{' and last '}' to extract valid JSON
+  const firstBrace = cleanStr.indexOf('{');
+  const lastBrace = cleanStr.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleanStr = cleanStr.substring(firstBrace, lastBrace + 1);
+  }
+  
   return cleanStr.trim();
 };
 
@@ -113,6 +122,13 @@ exports.convertResumeFile = async (req, res, next) => {
 
     res.status(200).json(jsonResponse);
   } catch (error) {
+    if (error.status === 429) {
+        return res.status(429).json({ 
+            success: false, 
+            error: error.message,
+            retryDelay: error.retryDelay 
+        });
+    }
     console.error("Gemini Conversion Error:", error);
     next(new Error(`Failed to process resume file: ${error.message}`));
   }
@@ -136,6 +152,13 @@ exports.createResumeFromText = async (req, res, next) => {
 
     res.status(200).json(jsonResponse);
   } catch (error) {
+    if (error.status === 429) {
+        return res.status(429).json({ 
+            success: false, 
+            error: error.message,
+            retryDelay: error.retryDelay 
+        });
+    }
     console.error("Gemini Text Structure Error:", error);
     next(new Error(`Failed to structure text: ${error.message}`));
   }
@@ -158,6 +181,9 @@ exports.improveResumeContent = async (req, res, next) => {
 
     res.status(200).json({ html: cleanJsonString(text) });
   } catch (error) {
+    if (error.status === 429) {
+        return res.status(429).json({ success: false, error: error.message });
+    }
     console.error("Improvement Error:", error);
     next(new Error("Failed to apply improvement."));
   }
@@ -186,12 +212,16 @@ exports.reorderResumeSections = async (req, res, next) => {
 
     res.status(200).json({ html: cleanJsonString(text) });
   } catch (error) {
+    if (error.status === 429) {
+        return res.status(429).json({ success: false, error: error.message });
+    }
     console.error("Reorder Error:", error);
     next(new Error("Failed to reorder sections."));
   }
 };
 
 exports.getATSFeedback = async (req, res, next) => {
+  let text = '';
   try {
     const { resumeText, jobDescription } = req.body;
     const model = genAI.getGenerativeModel({ 
@@ -208,6 +238,10 @@ exports.getATSFeedback = async (req, res, next) => {
 
     res.status(200).json(jsonResponse);
   } catch (error) {
+    if (error.status === 429) {
+        return res.status(429).json({ success: false, error: error.message });
+    }
+    console.error("Feedback Error [Raw Text]:", text); // Log raw text for debugging
     console.error("Feedback Error:", error);
     next(error);
   }

@@ -50,6 +50,10 @@ exports.register = async (req, res, next) => {
 
     sendTokenResponse(user, 201, res);
   } catch (err) {
+    // Handle duplicate email explicitly
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, error: 'Email already exists' });
+    }
     next(err);
   }
 };
